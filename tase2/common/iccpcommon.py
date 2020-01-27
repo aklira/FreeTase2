@@ -10,17 +10,19 @@ Free and open implementation of the IEC 60870-6 TASE.2 protocol
 from abc import ABC, abstractmethod
 
 class VCC:
+# a TASE.2 VCC is mapped onto an MMS VMD
     
     def __init__(self):
         pass
     
 class Domain:
+# a TASE.2 Domain is mapped onto an MMS Domain
 
     def __init__(self):
         pass
 
 class BilateralTable:
-
+# used to represent the information represented in the MMS VMD
 # bilateral_table_id: identifies the version number of the BT
 # tase2_version: identifies the version number of TASE.2
 
@@ -28,17 +30,17 @@ class BilateralTable:
                 ap_title,
                 bilateral_table_id,
                 tase2_version,
-                domain,
-                ae_titles,
-                associations,
-                datavalues,
-                datasets,
-                infomessages,
-                transferaccounts,
-                transfersets,
-                devices,
-                programs,
-                eventenrollments):
+                domain=None,
+                ae_titles=None,
+                associations=None,
+                datavalues=None,
+                datasets=None,
+                infomessages=None,
+                transferaccounts=None,
+                transfersets=None,
+                devices=None,
+                programs=None,
+                eventenrollments=None):
        self.ap-title = ap-title
        self.version = version
        self.iccpversion = iccpversion
@@ -88,7 +90,7 @@ class DataValue(ABC):
         pass
 
     @abstractmethod
-    def setDataValue(self):
+    def setDataValue(self, value):
         pass
 
     @abstractmethod    

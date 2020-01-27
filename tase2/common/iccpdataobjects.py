@@ -70,7 +70,9 @@ class ControlPoint(DataValue):
                  tagclass,
                  tag,
                  tagstate,
-                 reason):
+                 reason,
+                 acs):
+       super().__init__(acs)
        self.name = name
        self.type = type
        self.commandvalue = commandvalue
