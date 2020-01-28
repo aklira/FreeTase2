@@ -7,7 +7,7 @@ __version__ = "0.1"
 Free and open implementation of the IEC 60870-6 TASE.2 protocol
 '''
 
-from common.iccpcommon import DataValue
+from tase2.common.iccpcommon import DataValue
 
 class IndicationPoint(DataValue):
 
@@ -38,9 +38,9 @@ class IndicationPoint(DataValue):
        self.currentsource = currentsource
        self.normalsource = normalsource
        self.timestampclass = timestampclass
-       self.timestamp
-       self.timestampquality
-       self.COVClass
+       self.timestamp = timestamp
+       self.timestampquality = timestampquality
+       self.COVClass = COVClass
     
     def getDataValue(self):
         pass

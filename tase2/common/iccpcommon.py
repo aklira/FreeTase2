@@ -12,8 +12,31 @@ from abc import ABC, abstractmethod
 class VCC:
 # a TASE.2 VCC is mapped onto an MMS VMD
     
-    def __init__(self):
-        pass
+    def __init__(self,
+                bilateraltable,
+                domain=None,
+                ae_titles=None,
+                associations=None,
+                datavalues=None,
+                datasets=None,
+                infomessages=None,
+                transferaccounts=None,
+                transfersets=None,
+                devices=None,
+                programs=None,
+                eventenrollments=None):
+        self.bilateraltable = bilateraltable                
+        self.domain = domain
+        self.ae_titles = ae_titles
+        self.associations = associations
+        self.datavalues = datavalues
+        self.datasets = datasets
+        self.infomessages = infomessages
+        self.transferaccounts = transferaccounts
+        self.transfersets = transfersets
+        self.devices = devices
+        self.programs = programs
+        self.eventenrollments = eventenrollments
     
 class Domain:
 # a TASE.2 Domain is mapped onto an MMS Domain
@@ -30,32 +53,11 @@ class BilateralTable:
                 ap_title,
                 bilateral_table_id,
                 version,
-                tase2_version,
-                domain=None,
-                ae_titles=None,
-                associations=None,
-                datavalues=None,
-                datasets=None,
-                infomessages=None,
-                transferaccounts=None,
-                transfersets=None,
-                devices=None,
-                programs=None,
-                eventenrollments=None):
-       self.ap_title = ap_title
-       self.version = version
-       self.tase2_version = tase2_version
-       self.domain = domain
-       self.ae_titles = ae_titles
-       self.associations = associations
-       self.datavalues = datavalues
-       self.datasets = datasets
-       self.infomessages = infomessages
-       self.transferaccounts = transferaccounts
-       self.transfersets = transfersets
-       self.devices = devices
-       self.programs = programs
-       self.eventenrollments = eventenrollments
+                tase2_version):
+        self.bilateral_table_id = bilateral_table_id
+        self.ap_title = ap_title
+        self.version = version
+        self.tase2_version = tase2_version
        
 class Association():
 
