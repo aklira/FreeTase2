@@ -29,6 +29,7 @@ class BilateralTable:
     def __init__(self,
                 ap_title,
                 bilateral_table_id,
+                version,
                 tase2_version,
                 domain=None,
                 ae_titles=None,
@@ -41,11 +42,11 @@ class BilateralTable:
                 devices=None,
                 programs=None,
                 eventenrollments=None):
-       self.ap-title = ap-title
+       self.ap_title = ap_title
        self.version = version
-       self.iccpversion = iccpversion
+       self.tase2_version = tase2_version
        self.domain = domain
-       self.ae-titles = ae-titles
+       self.ae_titles = ae_titles
        self.associations = associations
        self.datavalues = datavalues
        self.datasets = datasets

@@ -7,7 +7,7 @@ __version__ = "0.1"
 Free and open implementation of the IEC 60870-6 TASE.2 protocol
 '''
 
-from iccpcommon import DataValue
+from common.iccpcommon import DataValue
 
 class IndicationPoint(DataValue):
 
