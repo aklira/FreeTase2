@@ -14,20 +14,18 @@ class VCC:
     
     def __init__(self,
                 bilateraltable,
-                domain=None,
-                ae_titles=None,
-                associations=None,
-                datavalues=None,
-                datasets=None,
-                infomessages=None,
-                transferaccounts=None,
-                transfersets=None,
-                devices=None,
-                programs=None,
-                eventenrollments=None):
+                domain,
+                associations=[],
+                datavalues=[],
+                datasets=[],
+                infomessages=[],
+                transferaccounts=[],
+                transfersets=[],
+                devices=[],
+                programs=[],
+                eventenrollments=[]):
         self.bilateraltable = bilateraltable                
         self.domain = domain
-        self.ae_titles = ae_titles
         self.associations = associations
         self.datavalues = datavalues
         self.datasets = datasets
@@ -37,6 +35,9 @@ class VCC:
         self.devices = devices
         self.programs = programs
         self.eventenrollments = eventenrollments
+    
+    def add_assoc_to_vcc(self, association):
+        self.associations.append(association)
     
 class Domain:
 # a TASE.2 Domain is mapped onto an MMS Domain
@@ -59,8 +60,7 @@ class BilateralTable:
         self.version = version
         self.tase2_version = tase2_version
        
-class Association():
-
+class Association:
 # supported_features: identifies the building blocks supported in the TASE.2 server
 
     def __init__(self, 
@@ -83,6 +83,7 @@ class Association():
         pass
 
 class DataValue(ABC):
+# abstract class representing either a IndicationPoint or ControlPoint or ProtectionEquipmentEvent
 
     def __init__(self, acs):
         super().__init__()
