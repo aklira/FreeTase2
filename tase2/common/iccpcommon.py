@@ -52,12 +52,12 @@ class BilateralTable:
 
     def __init__(self,
                 ap_title,
-                bilateral_table_id,
-                version,
+                blt_id,
+                blt_version,
                 tase2_version):
-        self.bilateral_table_id = bilateral_table_id
+        self.bilateral_table_id = blt_id
         self.ap_title = ap_title
-        self.version = version
+        self.version = blt_version
         self.tase2_version = tase2_version
        
 class Association:
