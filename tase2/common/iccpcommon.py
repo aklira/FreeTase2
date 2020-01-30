@@ -69,7 +69,7 @@ class Association:
                  qos, 
                  supported_features): # 
         self.association_id = association_id
-        self. ae_title =  ae_title
+        self.ae_title = ae_title
         self.qos = qos
         self.supported_features = supported_features
     
