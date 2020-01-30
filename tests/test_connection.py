@@ -4,7 +4,6 @@
 __version__ = "0.1"
 
 import tase2.client.client as tase2client
-import yaml
 
 conf_file = 'test_conn_conf.yml'
 
