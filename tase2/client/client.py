@@ -25,7 +25,9 @@ class IccpConnection:
         self.error = error
 
     def connect_to_server(self):
-        pass
+        mmsError = 0
+        result = iec61850.MmsConnection_connect(self.MmsConnection, mmsError, self.RemoteServer, 102)
+        return result
 
     def check_connection(self, id_iccp, loop_error):
         pass
@@ -108,6 +110,9 @@ def get_next_transferset(self, id_iccp):
     pass
 
 def start_iccp(conf_file):
+    global conn
+    global vcc
+    global conf
 # create tase2 conf from file 
     conf = IccpConf.create_from_file(conf_file)
 
@@ -139,6 +144,16 @@ def start_iccp(conf_file):
 # create datasets
 # add datasets to transfersets
     pass
+
+def connect_iccp():
+    success = False
+    try:
+        conn.connect_to_server()
+        success = True
+    except:
+        pass
+    return success
+
 
 def check_connections_threads(parameter):
     pass

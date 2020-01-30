@@ -1,0 +1,9 @@
+remote_server: "10.132.14.74"
+ap_title: "0.2.1449.57"
+blt_id: "TBLT_MBRU_ARP"
+blt_version: 1
+tase2_version: "2000.08"
+ds_name: "D_DN_PLC2"
+assoc_id: "C_DN_PLC2_MBRU_ARP"
+ae_title: "C1_DN_PLC2_MBRU_ARP"
+supported_features: "1.2.5"

@@ -6,11 +6,12 @@ __version__ = "0.1"
 import tase2.client.client as tase2client
 import yaml
 
-conf_file = 'config_tase2.yml'
+conf_file = 'test_conn_conf.yml'
 
 def main():
     tase2client.start_iccp(conf_file)
-    pass
+    result = tase2client.connect_iccp()
+    print(result)
 
 if __name__ == '__main__':
     main()
