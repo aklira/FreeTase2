@@ -7,7 +7,7 @@ __version__ = "0.1"
 Free and open implementation of the IEC 60870-6 TASE.2 protocol
 '''
 
-from abc import ABC, abstractmethod
+from abc import ABCMeta, abstractmethod
 
 class VCC:
 # a TASE.2 VCC is mapped onto an MMS VMD
@@ -82,8 +82,10 @@ class Association:
     def abort(self):
         pass
 
-class DataValue(ABC):
+class DataValue(object):
 # abstract class representing either a IndicationPoint or ControlPoint or ProtectionEquipmentEvent
+
+    __metaclass__ = ABCMeta
 
     def __init__(self, acs):
         super().__init__()

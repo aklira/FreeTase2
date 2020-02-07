@@ -3,6 +3,9 @@
 # info
 __version__ = "0.1"
 
+import sys
+sys.path.insert(0, "..")
+
 import tase2.client.client as tase2client
 
 conf_file = 'test_conn_conf.yml'

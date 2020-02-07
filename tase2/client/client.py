@@ -65,7 +65,7 @@ class IccpConf:
         # return cls(args)
 
         with open(conf_file, 'r') as config:
-            tase2_conf = yaml.load(config)
+            tase2_conf = yaml.load(config, Loader=yaml.FullLoader)
 
         remote_server = tase2_conf['remote_server']
         ap_title = tase2_conf['ap_title']
@@ -154,6 +154,12 @@ def connect_iccp():
         pass
     return success
 
+def check_bilateraltbl_attributes():
+# request "Bilateral_Table_ID", "TASE.2_Version", and "Supported_Features"
+# check with client local values
+# if values don't match issue a conclude request to server
+# loop until conflict is resolved
+    pass
 
 def check_connections_threads(parameter):
     pass
