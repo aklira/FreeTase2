@@ -1,9 +1,41 @@
-remote_server: "10.132.14.74"
-ap_title: "1.1.1.999.1"
-blt_id: "TBLT_ARN_PASSM"
-blt_version: 1
-tase2_version: "2000.08"
-ds_name: "D_ARN_PASSM"
-assoc_id: "ASSOC_ARN_PASSM"
-ae_title: "C1_TBLT_ARN_PASSM"
-supported_features: "1.2.5"
+transport_parameters:
+  remote_server: "10.132.0.110"
+  remote_port: 102
+  keepalive: 5
+  tls: false
+iso_parameters:
+  use_defaults: false
+  local_ap_title: "1.2.32.2"
+  local_ae_qual: 1
+  local_tselector:
+    - 0
+    - 1
+  local_sselector:
+    - 0
+    - 1
+  local_pselector:
+    - 0
+    - 0
+    - 0
+    - 1
+  remote_ap_title: "1.2.3"
+  remote_ae_qual: 21
+  remote_tselector:
+    - 0
+    - 1
+  remote_sselector:
+    - 0
+    - 1
+  remote_pselector:
+    - 0
+    - 0
+    - 0
+    - 1
+tase2_parameters:  
+  blt_id: "TestBilTab"
+  blt_version: "1"
+  tase2_version: "2000-08"
+  ds_name: "TestDomain"
+  assoc_id: "TestAssoc"
+  ae_title: "1.2.32.2-1"
+  supported_features: "1.2"
