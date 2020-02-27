@@ -246,7 +246,7 @@ def connect_iccp():
     return success
 
 def check_bilateraltbl_attributes(itemId):
-# request "Bilateral_Table_ID" itemId[0], "TASE.2_Version" itemId[1], and "Supported_Features itemId[2]"
+# request "Bilateral_Table_ID" itemId[0], "TASE2_Version" itemId[1], and "Supported_Features" itemId[2]
 # check with client local values
 # if values don't match issue a conclude request to server
 # loop until conflict is resolved
