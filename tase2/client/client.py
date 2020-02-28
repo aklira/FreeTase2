@@ -245,22 +245,45 @@ def connect_iccp():
         pass
     return success
 
-def check_bilateraltbl_attributes(itemId):
-# request "Bilateral_Table_ID" itemId[0], "TASE2_Version" itemId[1], and "Supported_Features" itemId[2]
+def check_bilateraltbl_attributes():
+# request "Bilateral_Table_ID", "TASE2_Version", and "Supported_Features"
 # check with client local values
 # if values don't match issue a conclude request to server
 # loop until conflict is resolved
     global conn
     global vcc
     mmsError = iec61850.toMmsErrorP()
+    bltid_ok = False
+    t2ver_ok = False
     success = False
     try:
-        value = iec61850.MmsConnection_readVariable(conn.MmsConnection, mmsError, vcc.domain, itemId[0])
-        print(itemId[0] + " : " + value)
-        if (value == vcc.bilateraltable.bilateral_table_id):
-            success = True
+        bltid_mms = iec61850.MmsConnection_readVariable(conn.MmsConnection, mmsError, vcc.domain, "Bilateral_Table_ID")
+        if (iec61850.MmsValue_toString(bltid_mms) == vcc.bilateraltable.bilateral_table_id):
+            bltid_ok = True
     except:
         pass
+    try:
+        tase2version_mms = iec61850.MmsConnection_readVariable(conn.MmsConnection, mmsError, None, "TASE2_Version")
+        tase2version_val_major = iec61850.MmsValue_toUint32(iec61850.MmsValue_getElement(tase2version_mms, 0))
+        tase2version_val_minor = iec61850.MmsValue_toUint32(iec61850.MmsValue_getElement(tase2version_mms, 1))
+        tase2version_str = str(tase2version_val_major) + "-" + str(tase2version_val_minor)
+        if (tase2version_str == vcc.bilateraltable.tase2_version):
+            t2ver_ok = True
+    except:
+        pass
+    try:
+        supp_feat_mms = iec61850.MmsConnection_readVariable(conn.MmsConnection, mmsError, None, "Supported_Features")
+        feat_bitstring_size = iec61850.MmsValue_getBitStringSize(supp_feat_mms)
+        lst1 = [1,2,3,4,5,6,7,8,9,10,11,12]
+        lst2 = []
+        for i in range(feat_bitstring_size):
+            lst2.append(iec61850.MmsValue_getBitStringBit(supp_feat_mms,i))
+        Supported_Features = [a*b for a,b in zip(lst1,lst2)]
+        filter(lambda a: a != 0, Supported_Features)
+        vcc.associations[0].supported_features = ".".join(str(Supported_Features))
+    except:
+        pass
+    success = bltid_ok and t2ver_ok
     return success
 
 def check_connections_threads(parameter):

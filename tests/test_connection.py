@@ -16,11 +16,7 @@ def main():
     # create and start connection
     result = tase2client.connect_iccp()
     # check bilateral tables attributes
-    itemId = []
-    itemId.append("Bilateral_Table_ID")
-    itemId.append("TASE2_Version")
-    itemId.append("Supported_Features")
-    result = tase2client.check_bilateraltbl_attributes(itemId)
+    result = tase2client.check_bilateraltbl_attributes()
     # keep connection alive until user interrupts
     while 1:
        print(result)
