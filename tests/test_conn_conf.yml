@@ -39,3 +39,4 @@ tase2_parameters:
   assoc_id: "TestAssoc"
   ae_title: "1.2.32.2-1"
   supported_features: "1.2"
+  number_of_datasets: 2

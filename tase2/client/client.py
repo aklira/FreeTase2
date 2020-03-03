@@ -62,7 +62,8 @@ class IccpConf:
                  ds_name,
                  assoc_id,
                  ae_title,
-                 supported_features):
+                 supported_features,
+                 number_of_datasets=1):
         # transport parameters
         self.remote_server = remote_server
         self.remote_port = remote_port
@@ -88,6 +89,7 @@ class IccpConf:
         self.assoc_id = assoc_id
         self.ae_title = ae_title
         self.supported_features = supported_features
+        self.number_of_datasets = number_of_datasets
     
     @classmethod
     def create_from_file(cls, conf_file):
@@ -123,6 +125,7 @@ class IccpConf:
         assoc_id = tase2_conf['tase2_parameters']['assoc_id']
         ae_title = tase2_conf['tase2_parameters']['ae_title']
         supported_features = tase2_conf['tase2_parameters']['supported_features']
+        number_of_datasets = tase2_conf['tase2_parameters']['number_of_datasets']
 
         return cls(remote_server,
                  remote_port,
@@ -145,7 +148,8 @@ class IccpConf:
                  ds_name,
                  assoc_id,
                  ae_title,
-                 supported_features)
+                 supported_features,
+                 number_of_datasets)
 
 
 conn = None
@@ -233,6 +237,7 @@ def start_iccp():
     chk_blt_tbl = False
     del_datasets_ok = False
     create_ts_ok = False
+    create_ds_ok = False
 # check bilateral tables attributes
     chk_blt_tbl = check_bilateraltbl_attributes()
 # delete existing datasets
@@ -243,18 +248,16 @@ def start_iccp():
         pass
 # create transfersets
     # loop over number of datasets to create
+    ds_ts_lst = []
     try:
-        ds_transferset = DSTransferSet("TS1",
-                                       vcc.associations[0].association_id,
-                                       None,
-                                       None,
-                                       None,
-                                       None,
-                                       None,
-                                       conn.MmsConnection,
-                                       mmsError)
-        ts_value = ds_transferset.get_next_transferset_value(vcc.domain)
-        create_ts_ok = (ts_value != None)
+        for i in range(conf.number_of_datasets):
+            ds_ts = DSTransferSet(conn.MmsConnection, mmsError)
+            ds_ts.set_name(ds_ts.get_next_transferset_value(vcc.domain))
+            ds_ts.set_association_id = vcc.associations[0].assoc_id
+            ds_ts.set_status = "ENABLED"
+            ds_ts_lst.append(ds_ts)
+
+        create_ts_ok = (len(ds_ts_lst) == 0)
     except:
         pass
 # create datasets

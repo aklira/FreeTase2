@@ -109,8 +109,10 @@ class DataValue(object):
         pass
 
 class DataSet():
-# class representing either a Dataset
+# class representing a Dataset
     def __init__(self,
+                 MmsConnection,
+                 mmsError,
                  name,
                  scope,
                  transferset_id,
@@ -118,9 +120,9 @@ class DataSet():
                  eventcode_detected,
                  transferset_timestamp,
                  datavalues,
-                 access_controls,
-                 MmsConnection,
-                 mmsError):
+                 access_controls):
+        self.MmsConnection = MmsConnection
+        self.mmsError = mmsError
         self.name = name
         self.scope = scope
         self.transferset_id = transferset_id
@@ -129,8 +131,6 @@ class DataSet():
         self.transferset_timestamp = transferset_timestamp
         self.datavalues = datavalues
         self.access_controls = access_controls
-        self.MmsConnection = MmsConnection
-        self.mmsError = mmsError
 
     def create_dataset(self, ds_name, offset):
         pass
@@ -160,24 +160,24 @@ class DataSet():
         pass
 
 class TransferSet(object):
-# abstract class representing either a TransferSet
+# abstract class representing TransferSet
 
     __metaclass__ = ABCMeta
 
     def __init__(self,
-                 name,
-                 association_id,
-                 status,
-                 access_controls,
                  MmsConnection,
-                 mmsError):
+                 mmsError,
+                 name=None,
+                 association_id=None,
+                 status="DISABLED",
+                 access_controls=None):
         super().__init__()
+        self.MmsConnection = MmsConnection
+        self.mmsError = mmsError
         self.name = name
         self.association_id = association_id
         self.status = status
         self.access_controls = access_controls
-        self.MmsConnection = MmsConnection
-        self.mmsError = mmsError
     
     @abstractmethod    
     def start_transfer(self):
@@ -203,15 +203,15 @@ class DSTransferSet(TransferSet):
 # class representing a DSTransferSet
 
     def __init__(self,
-                 name,
-                 association_id,
-                 status,
-                 access_controls,
-                 dataset_name,
-                 DSTransmissionsPars,
-                 EventCodeRequested,
                  MmsConnection,
-                 mmsError):
+                 mmsError,    
+                 name=None,
+                 association_id=None,
+                 status="ENABLED",
+                 access_controls=None,
+                 dataset_name=None,
+                 DSTransmissionsPars=None,
+                 EventCodeRequested=None):
         super().__init__(name,
                          association_id,
                          status,
@@ -220,20 +220,41 @@ class DSTransferSet(TransferSet):
                          mmsError)
         self.dataset_name = dataset_name
         self.DSTransmissionsPars = DSTransmissionsPars
-        self.EventCodeRequested = EventCodeRequested    
-       
+        self.EventCodeRequested = EventCodeRequested
+
+    def set_name(self, name):
+        self.name = name
+
+    def set_association_id(self, association_id):
+        self.association_id = association_id
+
+    def set_status(self, status):
+        self.status = status
+
+    def set_acs(self, acs):
+        self.access_controls = acs  
+
+    def set_dataset_name(self, ds_name):
+        self.dataset_name = ds_name
+
+    def set_DSTransmissionsPars(self, DSTransmissionsPars):
+        self.DSTransmissionsPars = DSTransmissionsPars
+
+    def set_EventCodeRequested(self, EventCodeRequested):
+        self.EventCodeRequested = EventCodeRequested
+
     def start_transfer(self):
         pass
  
     def stop_transfer(self):
         pass
 
-    def get_next_transferset_value(self, ds_name):
+    def get_next_transferset_value(self, domain):
         next_ts_value = None
         try:
             next_ts = iec61850.MmsConnection_readVariable(self.MmsConnection, 
                                                           self.mmsError, 
-                                                          ds_name, 
+                                                          domain, 
                                                           "Next_DSTransfer_Set")
             next_ts_value = iec61850.MmsValue_toString(iec61850.MmsValue_getElement(next_ts, 2))
         except:
