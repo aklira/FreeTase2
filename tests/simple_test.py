@@ -44,3 +44,5 @@ for i in range(feat_bitstring_size):
 Supported_Features = [a*b for a,b in zip(lst1,lst2)]   
 print("Supported_Features:")
 print(Supported_Features)
+ts_value = iec61850.MmsConnection_readVariable(mms_connection, mmsError, "TestDomain", "Next_DSTransfer_Set")
+var_names = iec61850.MmsConnection_getDomainVariableNames(mms_connection, mmsError, "TestDomain")

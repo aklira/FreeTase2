@@ -8,6 +8,7 @@ Free and open implementation of the IEC 60870-6 TASE.2 protocol
 '''
 
 from abc import ABCMeta, abstractmethod
+import iec61850
 
 class VCC:
 # a TASE.2 VCC is mapped onto an MMS VMD
@@ -67,7 +68,7 @@ class Association:
                  association_id, 
                  ae_title, 
                  qos, 
-                 supported_features): # 
+                 supported_features):
         self.association_id = association_id
         self.ae_title = ae_title
         self.qos = qos
@@ -87,9 +88,9 @@ class DataValue(object):
 
     __metaclass__ = ABCMeta
 
-    def __init__(self, acs):
+    def __init__(self, access_controls):
         super().__init__()
-        self.acs = acs
+        self.acs = access_controls
 
     @abstractmethod    
     def getDataValue(self):
@@ -107,4 +108,145 @@ class DataValue(object):
     def getDataValueType(self):
         pass
 
+class DataSet():
+# class representing either a Dataset
+    def __init__(self,
+                 name,
+                 scope,
+                 transferset_id,
+                 dsconditions_detected,
+                 eventcode_detected,
+                 transferset_timestamp,
+                 datavalues,
+                 access_controls,
+                 MmsConnection,
+                 mmsError):
+        self.name = name
+        self.scope = scope
+        self.transferset_id = transferset_id
+        self.dsconditions_detected = dsconditions_detected
+        self.eventcode_detected = eventcode_detected
+        self.transferset_timestamp = transferset_timestamp
+        self.datavalues = datavalues
+        self.access_controls = access_controls
+        self.MmsConnection = MmsConnection
+        self.mmsError = mmsError
+
+    def create_dataset(self, ds_name, offset):
+        pass
+
+    def delete_dataset(self, ds_name, dataset_id):
+        success = False
+        try:
+            iec61850.MmsConnection_deleteNamedVariableList(self.MmsConnection, 
+                                                           self.mmsError, 
+                                                           ds_name, 
+                                                           dataset_id)
+            success = True
+        except:
+            pass
+        return success
+    
+    def get_dataset_element_values(self):
+        pass
+
+    def set_dataset_element_values(self):
+        pass
+
+    def get_dataset_names(self):
+        pass
+
+    def get_dataset_element_names(self):
+        pass
+
+class TransferSet(object):
+# abstract class representing either a TransferSet
+
+    __metaclass__ = ABCMeta
+
+    def __init__(self,
+                 name,
+                 association_id,
+                 status,
+                 access_controls,
+                 MmsConnection,
+                 mmsError):
+        super().__init__()
+        self.name = name
+        self.association_id = association_id
+        self.status = status
+        self.access_controls = access_controls
+        self.MmsConnection = MmsConnection
+        self.mmsError = mmsError
+    
+    @abstractmethod    
+    def start_transfer(self):
+        pass
+
+    @abstractmethod    
+    def stop_transfer(self):
+        pass
+
+    @abstractmethod    
+    def get_next_transferset_value(self):
+        pass
+
+    @abstractmethod    
+    def condition_monitoring(self):
+        pass
+
+    @abstractmethod    
+    def transfer_report(self):
+        pass
+
+class DSTransferSet(TransferSet):
+# class representing a DSTransferSet
+
+    def __init__(self,
+                 name,
+                 association_id,
+                 status,
+                 access_controls,
+                 dataset_name,
+                 DSTransmissionsPars,
+                 EventCodeRequested,
+                 MmsConnection,
+                 mmsError):
+        super().__init__(name,
+                         association_id,
+                         status,
+                         access_controls,
+                         MmsConnection,
+                         mmsError)
+        self.dataset_name = dataset_name
+        self.DSTransmissionsPars = DSTransmissionsPars
+        self.EventCodeRequested = EventCodeRequested    
+       
+    def start_transfer(self):
+        pass
+ 
+    def stop_transfer(self):
+        pass
+
+    def get_next_transferset_value(self, ds_name):
+        next_ts_value = None
+        try:
+            next_ts = iec61850.MmsConnection_readVariable(self.MmsConnection, 
+                                                          self.mmsError, 
+                                                          ds_name, 
+                                                          "Next_DSTransfer_Set")
+            next_ts_value = iec61850.MmsValue_toString(iec61850.MmsValue_getElement(next_ts, 2))
+        except:
+            pass
+        return next_ts_value
+
+    def condition_monitoring(self):
+        pass
+    
+    def transfer_report(self):
+        pass
+
+class Device():
+# abstract class representing either a Device
+    pass
 

@@ -7,7 +7,7 @@ __version__ = "0.1"
 Free and open implementation of the IEC 60870-6 TASE.2 protocol
 '''
 
-from tase2.common.iccpcommon import VCC, BilateralTable, Association
+from tase2.common.iccpcommon import VCC, BilateralTable, Association, DataSet, DSTransferSet
 import yaml
 import iec61850
 
@@ -152,27 +152,11 @@ conn = None
 vcc = None
 conf = None
 
-def read_dataset(ds_name, offset):
-    pass
-
-def create_dataset(ds_name, offset):
-    pass
-
-def write_dataset(id_iccp, 
-                  ds_name, 
-                  ts_name, 
-                  buffer_time, 
-                  integrity_time, 
-                  all_changes_reported):
-    pass
-
-def get_next_transferset(self, id_iccp):
-    pass
-
-def start_iccp(conf_file):
+def init_iccp(conf_file):
     global conn
     global vcc
     global conf
+    success = False
 # create tase2 conf from file 
     conf = IccpConf.create_from_file(conf_file)
 
@@ -227,22 +211,55 @@ def start_iccp(conf_file):
 # create Association
     assoc_id = conf.assoc_id
     ae_title = conf.ae_title
-    supported_features = conf.supported_features
-    assoc = Association(assoc_id, ae_title, 0, supported_features)
+    assoc = Association(assoc_id, ae_title, 0, None)
     vcc.add_assoc_to_vcc(assoc)
 
-# delete existing datasets
-# create transfersets
-# create datasets
-# add datasets to transfersets
-    pass
+    return success
 
 def connect_iccp():
+    global conn
     success = False
     try:
         success = conn.connect_to_server()
     except:
         pass
+    return success
+
+def start_iccp():
+    global conn
+    global vcc
+    mmsError = iec61850.toMmsErrorP()
+    success = False
+    chk_blt_tbl = False
+    del_datasets_ok = False
+    create_ts_ok = False
+# check bilateral tables attributes
+    chk_blt_tbl = check_bilateraltbl_attributes()
+# delete existing datasets
+    try:
+        for dataset in vcc.datasets:
+            del_datasets_ok = dataset.delete_dataset(vcc.domain, dataset.name)
+    except:
+        pass
+# create transfersets
+    # loop over number of datasets to create
+    try:
+        ds_transferset = DSTransferSet("TS1",
+                                       vcc.associations[0].association_id,
+                                       None,
+                                       None,
+                                       None,
+                                       None,
+                                       None,
+                                       conn.MmsConnection,
+                                       mmsError)
+        ts_value = ds_transferset.get_next_transferset_value(vcc.domain)
+        create_ts_ok = (ts_value != None)
+    except:
+        pass
+# create datasets
+# add datasets to transfersets
+    success = chk_blt_tbl and del_datasets_ok and create_ts_ok
     return success
 
 def check_bilateraltbl_attributes():
@@ -260,6 +277,8 @@ def check_bilateraltbl_attributes():
         bltid_mms = iec61850.MmsConnection_readVariable(conn.MmsConnection, mmsError, vcc.domain, "Bilateral_Table_ID")
         if (iec61850.MmsValue_toString(bltid_mms) == vcc.bilateraltable.bilateral_table_id):
             bltid_ok = True
+        else:
+            iec61850.MmsConnection_conclude(conn.MmsConnection, mmsError)
     except:
         pass
     try:
@@ -269,6 +288,8 @@ def check_bilateraltbl_attributes():
         tase2version_str = str(tase2version_val_major) + "-" + str(tase2version_val_minor)
         if (tase2version_str == vcc.bilateraltable.tase2_version):
             t2ver_ok = True
+        else:
+            iec61850.MmsConnection_conclude(conn.MmsConnection, mmsError)
     except:
         pass
     try:

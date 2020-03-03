@@ -10,6 +10,7 @@ Free and open implementation of the IEC 60870-6 TASE.2 protocol
 from tase2.common.iccpcommon import DataValue
 
 class IndicationPoint(DataValue):
+# class representing a IndicationPoint
 
     def __init__(self,
                  name,
@@ -55,6 +56,7 @@ class IndicationPoint(DataValue):
         pass
 
 class ControlPoint(DataValue):
+# class representing a ControlPoint
 
     def __init__(self,
                  name,
@@ -101,7 +103,7 @@ class ControlPoint(DataValue):
         pass
 
 class ProtectionEquipmentEvent(DataValue):
-# not_yet_implemented
+# class representing a ProtectionEquipmentEvent
 
     def __init__(self):
         pass

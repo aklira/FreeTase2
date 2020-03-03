@@ -34,7 +34,7 @@ iso_parameters:
 tase2_parameters:  
   blt_id: "TestBilTab"
   blt_version: "1"
-  tase2_version: "2000-08"
+  tase2_version: "2000-8"
   ds_name: "TestDomain"
   assoc_id: "TestAssoc"
   ae_title: "1.2.32.2-1"

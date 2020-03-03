@@ -12,11 +12,17 @@ from time import sleep
 conf_file = 'test_conn_conf.yml'
 
 def main():
-    tase2client.start_iccp(conf_file)
+    # init iccp
+    result = tase2client.init_iccp(conf_file)
+    if (not result):
+        print("ICCP init error")
     # create and start connection
     result = tase2client.connect_iccp()
-    # check bilateral tables attributes
-    result = tase2client.check_bilateraltbl_attributes()
+    if (not result):
+        print("ICCP connection error")
+    result = tase2client.start_iccp()
+    if (not result):
+        print("ICCP start-up error")    
     # keep connection alive until user interrupts
     while 1:
        print(result)
