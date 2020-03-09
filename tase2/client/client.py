@@ -8,7 +8,8 @@ Free and open implementation of the IEC 60870-6 TASE.2 protocol
 '''
 
 from tase2.common.iccpcommon import VCC, BilateralTable, Association, DataSet, DSTransferSet
-import yaml
+from tase2.common.iccpdataobjects import IndicationPoint
+import yaml, json
 import iec61850
 
 class IccpConnection:
@@ -59,11 +60,10 @@ class IccpConf:
                  blt_id,
                  blt_version,
                  tase2_version,
-                 ds_name,
+                 domain,
                  assoc_id,
                  ae_title,
-                 supported_features,
-                 number_of_datasets=1):
+                 supported_features):
         # transport parameters
         self.remote_server = remote_server
         self.remote_port = remote_port
@@ -85,11 +85,10 @@ class IccpConf:
         self.blt_id = blt_id
         self.blt_version = blt_version
         self.tase2_version = tase2_version
-        self.ds_name = ds_name
+        self.domain = domain
         self.assoc_id = assoc_id
         self.ae_title = ae_title
         self.supported_features = supported_features
-        self.number_of_datasets = number_of_datasets
     
     @classmethod
     def create_from_file(cls, conf_file):
@@ -121,11 +120,10 @@ class IccpConf:
         blt_id = tase2_conf['tase2_parameters']['blt_id']
         blt_version = tase2_conf['tase2_parameters']['blt_version']
         tase2_version = tase2_conf['tase2_parameters']['tase2_version']
-        ds_name = tase2_conf['tase2_parameters']['ds_name']
+        domain = tase2_conf['tase2_parameters']['domain']
         assoc_id = tase2_conf['tase2_parameters']['assoc_id']
         ae_title = tase2_conf['tase2_parameters']['ae_title']
         supported_features = tase2_conf['tase2_parameters']['supported_features']
-        number_of_datasets = tase2_conf['tase2_parameters']['number_of_datasets']
 
         return cls(remote_server,
                  remote_port,
@@ -145,16 +143,16 @@ class IccpConf:
                  blt_id,
                  blt_version,
                  tase2_version,
-                 ds_name,
+                 domain,
                  assoc_id,
                  ae_title,
-                 supported_features,
-                 number_of_datasets)
+                 supported_features)
 
 
 conn = None
 vcc = None
-conf = None
+iccpconf = None
+dataconf = None
 
 def init_iccp(conf_file):
     global conn
@@ -162,61 +160,63 @@ def init_iccp(conf_file):
     global conf
     success = False
 # create tase2 conf from file 
-    conf = IccpConf.create_from_file(conf_file)
+    iccpconf = IccpConf.create_from_file(conf_file)
 
 # create IccpConnection
-    if (conf.use_defaults == True):
+    if (iccpconf.use_defaults == True):
         mms_connection = iec61850.MmsConnection_create()
     else:
         # connecting with custom ISO parameters: TSelector, SSelector, PSelector, AP-Title, AE-Qualifier
         local_tselector = iec61850.TSelector()
-        local_tselector.size = len(conf.local_tselector)
-        local_tselector.value = conf.local_tselector 
+        local_tselector.size = len(iccpconf.local_tselector)
+        local_tselector.value = iccpconf.local_tselector 
         local_sselector = iec61850.SSelector()
-        local_sselector.size = len(conf.local_sselector)
-        local_sselector.value = conf.local_sselector
+        local_sselector.size = len(iccpconf.local_sselector)
+        local_sselector.value = iccpconf.local_sselector
         local_pselector = iec61850.PSelector()
-        local_pselector.size = len(conf.local_pselector)
-        local_pselector.value = conf.local_pselector 
+        local_pselector.size = len(iccpconf.local_pselector)
+        local_pselector.value = iccpconf.local_pselector 
         remote_tselector = iec61850.TSelector()
-        remote_tselector.size = len(conf.remote_tselector)
-        remote_tselector.value = conf.remote_tselector 
+        remote_tselector.size = len(iccpconf.remote_tselector)
+        remote_tselector.value = iccpconf.remote_tselector 
         remote_sselector = iec61850.SSelector()
-        remote_sselector.size = len(conf.remote_sselector)
-        remote_sselector.value = conf.remote_sselector 
+        remote_sselector.size = len(iccpconf.remote_sselector)
+        remote_sselector.value = iccpconf.remote_sselector 
         remote_pselector = iec61850.PSelector()
-        remote_pselector.size = len(conf.remote_pselector)
-        remote_pselector.value = conf.remote_pselector  
-        mms_connection = iec61850.MmsConnection_createWisop(conf.local_ap_title,
-                                                            conf.local_ae_qual,
+        remote_pselector.size = len(iccpconf.remote_pselector)
+        remote_pselector.value = iccpconf.remote_pselector  
+        mms_connection = iec61850.MmsConnection_createWisop(iccpconf.local_ap_title,
+                                                            iccpconf.local_ae_qual,
                                                             local_tselector,
                                                             local_sselector,
                                                             local_pselector,
-                                                            conf.remote_ap_title, 
-                                                            conf.remote_ae_qual,
+                                                            iccpconf.remote_ap_title, 
+                                                            iccpconf.remote_ae_qual,
                                                             remote_tselector,
                                                             remote_sselector,
                                                             remote_pselector)
-    remote_server = conf.remote_server
-    remote_port = conf.remote_port
+    remote_server = iccpconf.remote_server
+    remote_port = iccpconf.remote_port
     conn = IccpConnection(mms_connection, remote_server, remote_port)
 
 # create VCC
  # create bilateral table
-    ap_title = conf.remote_ap_title
-    blt_id = conf.blt_id
-    blt_version = conf.blt_version
-    tase2_version = conf.tase2_version
+    ap_title = iccpconf.remote_ap_title
+    blt_id = iccpconf.blt_id
+    blt_version = iccpconf.blt_version
+    tase2_version = iccpconf.tase2_version
     bilateraltable = BilateralTable(ap_title, blt_id, blt_version, tase2_version)
 
-    ds_name = conf.ds_name
-    vcc = VCC(bilateraltable, ds_name)
+    domain = iccpconf.domain
+    vcc = VCC(bilateraltable, domain)
 
 # create Association
-    assoc_id = conf.assoc_id
-    ae_title = conf.ae_title
+    assoc_id = iccpconf.assoc_id
+    ae_title = iccpconf.ae_title
     assoc = Association(assoc_id, ae_title, 0, None)
     vcc.add_assoc_to_vcc(assoc)
+
+    success = True
 
     return success
 
@@ -229,41 +229,80 @@ def connect_iccp():
         pass
     return success
 
-def start_iccp():
+def start_iccp(dataconf_file):
     global conn
     global vcc
     mmsError = iec61850.toMmsErrorP()
     success = False
     chk_blt_tbl = False
     del_datasets_ok = False
+    read_dataconf_ok = False
     create_ts_ok = False
     create_ds_ok = False
+
 # check bilateral tables attributes
     chk_blt_tbl = check_bilateraltbl_attributes()
+
 # delete existing datasets
     try:
-        for dataset in vcc.datasets:
-            del_datasets_ok = dataset.delete_dataset(vcc.domain, dataset.name)
+        if (len(vcc.datasets) != 0):
+            for dataset in vcc.datasets:
+                del_datasets_ok = dataset.delete_dataset(vcc.domain, dataset.name)
+        else:
+            del_datasets_ok = True
     except:
         pass
-# create transfersets
-    # loop over number of datasets to create
-    ds_ts_lst = []
+
+# create datasets from input file
     try:
-        for i in range(conf.number_of_datasets):
+        dataconf = readDataConf(dataconf_file, conn.MmsConnection, mmsError)
+        read_dataconf_ok = (len(dataconf) != 0)
+    except:
+        pass
+
+    try:        
+        for ds_item in dataconf:
+            vars = iec61850.LinkedList_create()
+            name = iec61850.MmsVariableAccessSpecification_create(vcc.domain, "Transfer_Set_Name")
+            tst = iec61850.MmsVariableAccessSpecification_create(vcc.domain, "Transfer_Set_Time_Stamp")
+            dsc = iec61850.MmsVariableAccessSpecification_create(vcc.domain, "DSConditions_Detected")
+            iec61850.LinkedList_add(vars, name)
+            iec61850.LinkedList_add(vars, tst)
+            iec61850.LinkedList_add(vars, dsc)
+
+            var = None
+            for dv_item in ds_item.datavalues:
+                var = iec61850.MmsVariableAccessSpecification_create(vcc.domain, dv_item.name.encode("utf-8"))
+                iec61850.LinkedList_add(vars, var)
+
+            iec61850.MmsConnection_defineNamedVariableList(conn.MmsConnection, 
+                                                           mmsError, 
+                                                           vcc.domain, 
+                                                           ds_item.name.encode("utf-8"), 
+                                                           vars)
+        create_ds_ok = True
+    except:
+        pass
+
+    return chk_blt_tbl and del_datasets_ok and read_dataconf_ok and create_ds_ok
+'''
+# create transfersets
+    ds_ts_lst = []
+
+    try:
+        for ds_item in dataconf:
             ds_ts = DSTransferSet(conn.MmsConnection, mmsError)
             ds_ts.set_name(ds_ts.get_next_transferset_value(vcc.domain))
             ds_ts.set_association_id = vcc.associations[0].assoc_id
             ds_ts.set_status = "ENABLED"
             ds_ts_lst.append(ds_ts)
 
-        create_ts_ok = (len(ds_ts_lst) == 0)
+        create_ts_ok = (len(ds_ts_lst) != 0)
     except:
         pass
-# create datasets
 # add datasets to transfersets
-    success = chk_blt_tbl and del_datasets_ok and create_ts_ok
-    return success
+    success = chk_blt_tbl and del_datasets_ok and create_ds_ok and create_ts_ok
+'''
 
 def check_bilateraltbl_attributes():
 # request "Bilateral_Table_ID", "TASE2_Version", and "Supported_Features"
@@ -312,3 +351,18 @@ def check_bilateraltbl_attributes():
 
 def check_connections_threads(parameter):
     pass
+
+def readDataConf(json_file, mmsConnection, mmsError):
+    with open(json_file, 'r') as data_conf:
+        dataconf = json.load(data_conf)
+    
+    ds_lst = []
+    for ds_item in dataconf['datasets']:
+        dv_lst = []
+        for dv_item in ds_item['ds_values']:
+                dv = IndicationPoint(dv_item['id'], dv_item['type'])
+                dv_lst.append(dv)
+        ds = DataSet(mmsConnection, mmsError, ds_item['ds_name'], dv_lst)
+        ds_lst.append(ds)
+    
+    return ds_lst

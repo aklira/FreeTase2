@@ -35,8 +35,7 @@ tase2_parameters:
   blt_id: "TestBilTab"
   blt_version: "1"
   tase2_version: "2000-8"
-  ds_name: "TestDomain"
+  domain: "TestDomain"
   assoc_id: "TestAssoc"
   ae_title: "1.2.32.2-1"
   supported_features: "1.2"
-  number_of_datasets: 2

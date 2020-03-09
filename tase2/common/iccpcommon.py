@@ -88,8 +88,8 @@ class DataValue(object):
 
     __metaclass__ = ABCMeta
 
-    def __init__(self, access_controls):
-        super().__init__()
+    def __init__(self, access_controls=None):
+        super(DataValue, self).__init__()
         self.acs = access_controls
 
     @abstractmethod    
@@ -114,13 +114,13 @@ class DataSet():
                  MmsConnection,
                  mmsError,
                  name,
-                 scope,
-                 transferset_id,
-                 dsconditions_detected,
-                 eventcode_detected,
-                 transferset_timestamp,
                  datavalues,
-                 access_controls):
+                 scope=None,
+                 transferset_id=None,
+                 dsconditions_detected=None,
+                 eventcode_detected=None,
+                 transferset_timestamp=None,
+                 access_controls=None):
         self.MmsConnection = MmsConnection
         self.mmsError = mmsError
         self.name = name
@@ -132,7 +132,7 @@ class DataSet():
         self.datavalues = datavalues
         self.access_controls = access_controls
 
-    def create_dataset(self, ds_name, offset):
+    def create_dataset(self, ds_name):
         pass
 
     def delete_dataset(self, ds_name, dataset_id):
@@ -165,18 +165,8 @@ class TransferSet(object):
     __metaclass__ = ABCMeta
 
     def __init__(self,
-                 MmsConnection,
-                 mmsError,
-                 name=None,
-                 association_id=None,
-                 status="DISABLED",
                  access_controls=None):
-        super().__init__()
-        self.MmsConnection = MmsConnection
-        self.mmsError = mmsError
-        self.name = name
-        self.association_id = association_id
-        self.status = status
+        super(TransferSet, self).__init__()
         self.access_controls = access_controls
     
     @abstractmethod    
@@ -207,17 +197,17 @@ class DSTransferSet(TransferSet):
                  mmsError,    
                  name=None,
                  association_id=None,
-                 status="ENABLED",
+                 status="DISABLED",
                  access_controls=None,
                  dataset_name=None,
                  DSTransmissionsPars=None,
                  EventCodeRequested=None):
-        super().__init__(name,
-                         association_id,
-                         status,
-                         access_controls,
-                         MmsConnection,
-                         mmsError)
+        super(DSTransferSet, self).__init__(access_controls)
+        self.MmsConnection = MmsConnection
+        self.mmsError = mmsError
+        self.name = name
+        self.association_id = association_id
+        self.status = status
         self.dataset_name = dataset_name
         self.DSTransmissionsPars = DSTransmissionsPars
         self.EventCodeRequested = EventCodeRequested

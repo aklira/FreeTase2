@@ -10,19 +10,26 @@ import tase2.client.client as tase2client
 from time import sleep
 
 conf_file = 'test_conn_conf.yml'
+data_conf = 'test_data_conf.json'
 
 def main():
     # init iccp
     result = tase2client.init_iccp(conf_file)
     if (not result):
         print("ICCP init error")
+    else:
+        print("ICCP init ok")
     # create and start connection
     result = tase2client.connect_iccp()
     if (not result):
         print("ICCP connection error")
-    result = tase2client.start_iccp()
+    else:
+        print("ICCP connection ok")
+    result = tase2client.start_iccp(data_conf)
     if (not result):
-        print("ICCP start-up error")    
+        print("ICCP client start-up error")
+    else:
+        print("ICCP client start-up ok")    
     # keep connection alive until user interrupts
     while 1:
        print(result)

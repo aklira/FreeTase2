@@ -1,0 +1,18 @@
+{ 
+    "datasets": [
+        {
+            "ds_name": "ds_real",
+            "ds_values": [
+                {"id":"tm1","type":"IRQ"},
+                {"id":"tm2","type":"IRQ"}
+            ]
+        },
+        {
+            "ds_name": "ds_state",
+            "ds_values": [
+                {"id":"ts1","type":"ISQTX"},
+                {"id":"ts2","type":"ISQTX"}
+            ]
+        }
+    ]
+}

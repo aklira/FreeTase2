@@ -14,23 +14,23 @@ class IndicationPoint(DataValue):
 
     def __init__(self,
                  name,
-                 type,
-                 realvalue,
-                 statevalue,
-                 discretevalue,
-                 qualityclass,
-                 validity,
-                 currentsource,
-                 normalsource,
-                 normalvalue,
-                 timestampclass,
-                 timestamp,
-                 timestampquality,
-                 COVClass,
-                 acs):
-       super().__init__(acs) 
+                 dv_type,
+                 realvalue=None,
+                 statevalue=None,
+                 discretevalue=None,
+                 qualityclass=None,
+                 validity=None,
+                 currentsource=None,
+                 normalsource=None,
+                 normalvalue=None,
+                 timestampclass=None,
+                 timestamp=None,
+                 timestampquality=None,
+                 COVClass=None,
+                 acs=None):
+       super(IndicationPoint, self).__init__(acs) 
        self.name = name
-       self.type = type
+       self.type = dv_type
        self.realvalue = realvalue
        self.statevalue = statevalue
        self.discretevalue = discretevalue
@@ -60,23 +60,23 @@ class ControlPoint(DataValue):
 
     def __init__(self,
                  name,
-                 type,
-                 commandvalue,
-                 setpointtype,
-                 setpointrealvalue,
-                 setpointdiscretevalue,
-                 deviceclass,
-                 checkbackname,
-                 state,
-                 timeout,
-                 tagclass,
-                 tag,
-                 tagstate,
-                 reason,
-                 acs):
-       super().__init__(acs)
+                 dv_type,
+                 commandvalue=None,
+                 setpointtype=None,
+                 setpointrealvalue=None,
+                 setpointdiscretevalue=None,
+                 deviceclass=None,
+                 checkbackname=None,
+                 state=None,
+                 timeout=None,
+                 tagclass=None,
+                 tag=None,
+                 tagstate=None,
+                 reason=None,
+                 acs=None):
+       super(ControlPoint, self).__init__(acs)
        self.name = name
-       self.type = type
+       self.type = dv_type
        self.commandvalue = commandvalue
        self.setpointtype = setpointtype
        self.setpointrealvalue = setpointrealvalue
