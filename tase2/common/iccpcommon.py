@@ -240,16 +240,21 @@ class DSTransferSet(TransferSet):
         pass
 
     def get_next_transferset_value(self, domain):
-        next_ts_value = None
-        try:
-            next_ts = iec61850.MmsConnection_readVariable(self.MmsConnection, 
-                                                          self.mmsError, 
-                                                          domain, 
-                                                          "Next_DSTransfer_Set")
-            next_ts_value = iec61850.MmsValue_toString(iec61850.MmsValue_getElement(next_ts, 2))
-        except:
-            pass
-        return next_ts_value
+        # causes a stack smashing detected error when called from outside => to be debugged later
+        #next_ts_value = "default"
+        #try:
+        #    print(next_ts_value)
+        #    next_ts = iec61850.MmsConnection_readVariable(self.MmsConnection, 
+        #                                                  self.mmsError, 
+        #                                                  domain, 
+        #                                                  "Next_DSTransfer_Set")
+        #    print(next_ts)
+        #    next_ts_value = iec61850.MmsValue_toString(iec61850.MmsValue_getElement(next_ts, 2))
+        #    print(next_ts_value)
+        #except:
+        #    pass
+        #return next_ts_value
+        pass
 
     def condition_monitoring(self):
         pass

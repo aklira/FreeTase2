@@ -234,14 +234,14 @@ def start_iccp(dataconf_file):
     global vcc
     mmsError = iec61850.toMmsErrorP()
     success = False
-    chk_blt_tbl = False
+    chk_blt_tbl_ok = False
     del_datasets_ok = False
     read_dataconf_ok = False
     create_ts_ok = False
     create_ds_ok = False
 
 # check bilateral tables attributes
-    chk_blt_tbl = check_bilateraltbl_attributes()
+    chk_blt_tbl_ok = check_bilateraltbl_attributes()
 
 # delete existing datasets
     try:
@@ -270,10 +270,12 @@ def start_iccp(dataconf_file):
             iec61850.LinkedList_add(vars, tst)
             iec61850.LinkedList_add(vars, dsc)
 
-            var = None
+            var_s_lst = []
             for dv_item in ds_item.datavalues:
                 var = iec61850.MmsVariableAccessSpecification_create(vcc.domain, dv_item.name.encode("utf-8"))
                 iec61850.LinkedList_add(vars, var)
+                # fixes a bug with the var pointing to the last item of the dv_item list 
+                var_s_lst.append(iec61850.getMmsVASItemId(var))
 
             iec61850.MmsConnection_defineNamedVariableList(conn.MmsConnection, 
                                                            mmsError, 
@@ -284,25 +286,29 @@ def start_iccp(dataconf_file):
     except:
         pass
 
-    return chk_blt_tbl and del_datasets_ok and read_dataconf_ok and create_ds_ok
-'''
 # create transfersets
     ds_ts_lst = []
-
     try:
         for ds_item in dataconf:
             ds_ts = DSTransferSet(conn.MmsConnection, mmsError)
-            ds_ts.set_name(ds_ts.get_next_transferset_value(vcc.domain))
-            ds_ts.set_association_id = vcc.associations[0].assoc_id
+            next_ts = iec61850.MmsConnection_readVariable(conn.MmsConnection, 
+                                                          mmsError, 
+                                                          vcc.domain, 
+                                                          "Next_DSTransfer_Set")
+            next_ts_value = iec61850.MmsValue_toString(iec61850.MmsValue_getElement(next_ts, 2))
+            #next_ts = ds_ts.get_next_transferset_value(vcc.domain)
+            ds_ts.set_name(next_ts_value)
+            ds_ts.set_association_id(vcc.associations[0].association_id)
             ds_ts.set_status = "ENABLED"
             ds_ts_lst.append(ds_ts)
 
         create_ts_ok = (len(ds_ts_lst) != 0)
     except:
         pass
+
 # add datasets to transfersets
-    success = chk_blt_tbl and del_datasets_ok and create_ds_ok and create_ts_ok
-'''
+    success = chk_blt_tbl_ok and del_datasets_ok and read_dataconf_ok and create_ds_ok and create_ts_ok
+    return success
 
 def check_bilateraltbl_attributes():
 # request "Bilateral_Table_ID", "TASE2_Version", and "Supported_Features"
