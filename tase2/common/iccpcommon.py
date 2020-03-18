@@ -114,6 +114,7 @@ class DataSet():
                  MmsConnection,
                  mmsError,
                  name,
+                 ds_type,
                  datavalues,
                  scope=None,
                  transferset_id=None,
@@ -124,6 +125,7 @@ class DataSet():
         self.MmsConnection = MmsConnection
         self.mmsError = mmsError
         self.name = name
+        self.ds_type = ds_type
         self.scope = scope
         self.transferset_id = transferset_id
         self.dsconditions_detected = dsconditions_detected
@@ -200,6 +202,7 @@ class DSTransferSet(TransferSet):
                  status="DISABLED",
                  access_controls=None,
                  dataset_name=None,
+                 dataset_type=None,
                  DSTransmissionsPars=None,
                  EventCodeRequested=None):
         super(DSTransferSet, self).__init__(access_controls)
@@ -209,6 +212,7 @@ class DSTransferSet(TransferSet):
         self.association_id = association_id
         self.status = status
         self.dataset_name = dataset_name
+        self.dataset_type = dataset_type
         self.DSTransmissionsPars = DSTransmissionsPars
         self.EventCodeRequested = EventCodeRequested
 
@@ -226,6 +230,9 @@ class DSTransferSet(TransferSet):
 
     def set_dataset_name(self, ds_name):
         self.dataset_name = ds_name
+
+    def set_dataset_type(self, ds_type):
+        self.dataset_type = ds_type
 
     def set_DSTransmissionsPars(self, DSTransmissionsPars):
         self.DSTransmissionsPars = DSTransmissionsPars

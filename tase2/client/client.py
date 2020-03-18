@@ -158,6 +158,11 @@ REPORT_BUFFERED=0x01
 REPORT_INTERVAL_TIMEOUT=0x02
 REPORT_OBJECT_CHANGES=0x04
 
+integrity_time=0 
+analog_buf=0 
+digital_buf=0 
+events_buf=0
+
 def init_iccp(conf_file):
     global conn
     global vcc
@@ -243,9 +248,14 @@ def start_iccp(dataconf_file):
     read_dataconf_ok = False
     create_ts_ok = False
     create_ds_ok = False
+    add_ds_ts_ok = False
 
 # check bilateral tables attributes
-    chk_blt_tbl_ok = check_bilateraltbl_attributes()
+    try:
+        chk_blt_tbl_ok = check_bilateraltbl_attributes()
+    except:
+        print("Error in checking bilateral tables attributes")
+        pass
 
 # delete existing datasets
     try:
@@ -255,6 +265,7 @@ def start_iccp(dataconf_file):
         else:
             del_datasets_ok = True
     except:
+        print("Error in deleting datasets")
         pass
 
 # create datasets from input file
@@ -288,6 +299,7 @@ def start_iccp(dataconf_file):
                                                            vars)
         create_ds_ok = True
     except:
+        print("Error in creating datasets from input file")
         pass
 
 # create transfersets
@@ -302,16 +314,53 @@ def start_iccp(dataconf_file):
             next_ts_value = iec61850.MmsValue_toString(iec61850.MmsValue_getElement(next_ts, 2))
             #next_ts = ds_ts.get_next_transferset_value(vcc.domain)
             ds_ts.set_name(next_ts_value)
+            ds_ts.set_dataset_name(ds_item.name)
+            ds_ts.set_dataset_type(ds_item.ds_type)
             ds_ts.set_association_id(vcc.associations[0].association_id)
             ds_ts.set_status = "ENABLED"
             ds_ts_lst.append(ds_ts)
 
         create_ts_ok = (len(ds_ts_lst) != 0)
     except:
+        print("Error in creating transfersets")
         pass
 
 # add datasets to transfersets
-    success = chk_blt_tbl_ok and del_datasets_ok and read_dataconf_ok and create_ds_ok and create_ts_ok
+    for ds_ts_item in ds_ts_lst:
+        try:
+            if (ds_ts_item.dataset_type == "analog"):
+                add_ds_ts_ok = write_dataset(conn.MmsConnection,
+                            mmsError,  
+                            vcc.domain, 
+                            ds_ts_item.dataset_name, 
+                            ds_ts_item.name, 
+                            analog_buf, 
+                            integrity_time, 
+                            REPORT_INTERVAL_TIMEOUT|REPORT_OBJECT_CHANGES|REPORT_BUFFERED)
+            elif (ds_ts_item.dataset_type == "digital"):
+                 add_ds_ts_ok = write_dataset(conn.MmsConnection,
+                            mmsError,  
+                            vcc.domain, 
+                            ds_ts_item.dataset_name, 
+                            ds_ts_item.name, 
+                            digital_buf, 
+                            integrity_time, 
+                            REPORT_INTERVAL_TIMEOUT|REPORT_OBJECT_CHANGES)
+            elif (ds_ts_item.dataset_type == "events"):
+                 add_ds_ts_ok = write_dataset(conn.MmsConnection,
+                            mmsError,  
+                            vcc.domain, 
+                            ds_ts_item.dataset_name, 
+                            ds_ts_item.name, 
+                            events_buf, 
+                            integrity_time, 
+                            REPORT_OBJECT_CHANGES)
+            else:
+                add_ds_ts_ok = False
+        except:
+            print("Error in adding datasets to transfersets ")
+            pass
+    success = chk_blt_tbl_ok and del_datasets_ok and read_dataconf_ok and create_ds_ok and create_ts_ok and add_ds_ts_ok
     return success
 
 def check_bilateraltbl_attributes():
@@ -372,7 +421,7 @@ def readDataConf(json_file, mmsConnection, mmsError):
         for dv_item in ds_item['ds_values']:
                 dv = IndicationPoint(dv_item['id'], dv_item['type'])
                 dv_lst.append(dv)
-        ds = DataSet(mmsConnection, mmsError, ds_item['ds_name'], dv_lst)
+        ds = DataSet(mmsConnection, mmsError, ds_item['ds_name'], ds_item['ds_type'], dv_lst)
         ds_lst.append(ds)
     
     return ds_lst
@@ -386,6 +435,8 @@ def write_dataset(mmsConnection,
                   integrity_time, 
                   all_changes_reported):
     
+    success = False
+
     typeSpec = iec61850.MmsVariableSpecification_create(1)
     iec61850.setMmsVSType(typeSpec, 1) # MMS_STRUCTURE
     iec61850.setMmsVSTypeSpecElementCount(typeSpec, 13)
@@ -528,4 +579,6 @@ def write_dataset(mmsConnection,
 
     iec61850.MmsConnection_writeVariable(mmsConnection, mmsError, domain, ts_name, dataset)
 
-    iec61850.MmsValue_delete(dataset)
+    success = True
+
+    return success
