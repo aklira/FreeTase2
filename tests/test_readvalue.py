@@ -11,7 +11,7 @@ import iec61850
 
 domain = "TestDomain"
 ds_name = "ds_real"
-itemId = "tm1"
+itemId = ["tm1", "tm2", "ts1", "ts2"]
 
 remote_server = "10.132.0.110"
 remote_port = 102
@@ -53,11 +53,16 @@ def main():
                                                    ds_name, 
                                                    vars)
 
-    value = iec61850.MmsConnection_readVariable(mms_connection, mmsError, domain, itemId)
-    val_part1 = iec61850.MmsValue_toDouble(iec61850.MmsValue_getElement(value, 0))
-    val_part2 = iec61850.MmsValue_getElement(value, 1)
-    print(val_part1)
-    print(val_part2)
+    for item in itemId:
+        value = iec61850.MmsConnection_readVariable(mms_connection, mmsError, domain, item)
+        val_part1 = iec61850.MmsValue_toDouble(iec61850.MmsValue_getElement(value, 0))
+        val_part2 = iec61850.MmsValue_getElement(value, 1)
+        bitstring_size = iec61850.MmsValue_getBitStringSize(val_part2)
+        print(item)
+        print("value: %s" % val_part1)
+        print("bitstring_size: %s" % bitstring_size)
+        for i in range(bitstring_size):
+            print("bitstring_value: %s" % iec61850.MmsValue_getBitStringBit(val_part2,i))
 
 if __name__ == '__main__':
     main()
