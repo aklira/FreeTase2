@@ -39,30 +39,34 @@ def main():
     mmsError = iec61850.toMmsErrorP()
     conn = iec61850.MmsConnection_connect(mms_connection, mmsError, remote_server, remote_port)
 
-    vars = iec61850.LinkedList_create()
-    name = iec61850.MmsVariableAccessSpecification_create(domain, "Transfer_Set_Name")
-    tst = iec61850.MmsVariableAccessSpecification_create(domain, "Transfer_Set_Time_Stamp")
-    dsc = iec61850.MmsVariableAccessSpecification_create(domain, "DSConditions_Detected")
-    iec61850.LinkedList_add(vars, name)
-    iec61850.LinkedList_add(vars, tst)
-    iec61850.LinkedList_add(vars, dsc)
+    if (conn):
+        print("Connection established!\n")
+        vars = iec61850.LinkedList_create()
+        name = iec61850.MmsVariableAccessSpecification_create(domain, "Transfer_Set_Name")
+        tst = iec61850.MmsVariableAccessSpecification_create(domain, "Transfer_Set_Time_Stamp")
+        dsc = iec61850.MmsVariableAccessSpecification_create(domain, "DSConditions_Detected")
+        iec61850.LinkedList_add(vars, name)
+        iec61850.LinkedList_add(vars, tst)
+        iec61850.LinkedList_add(vars, dsc)
 
-    iec61850.MmsConnection_defineNamedVariableList(mms_connection, 
-                                                   mmsError, 
-                                                   domain, 
-                                                   ds_name, 
-                                                   vars)
+        iec61850.MmsConnection_defineNamedVariableList(mms_connection, 
+                                                       mmsError, 
+                                                       domain, 
+                                                       ds_name, 
+                                                       vars)
 
-    for item in itemId:
-        value = iec61850.MmsConnection_readVariable(mms_connection, mmsError, domain, item)
-        val_part1 = iec61850.MmsValue_toDouble(iec61850.MmsValue_getElement(value, 0))
-        val_part2 = iec61850.MmsValue_getElement(value, 1)
-        bitstring_size = iec61850.MmsValue_getBitStringSize(val_part2)
-        print(item)
-        print("value: %s" % val_part1)
-        print("bitstring_size: %s" % bitstring_size)
-        for i in range(bitstring_size):
-            print("bitstring_value: %s" % iec61850.MmsValue_getBitStringBit(val_part2,i))
+        for item in itemId:
+            value = iec61850.MmsConnection_readVariable(mms_connection, mmsError, domain, item)
+            val_part1 = iec61850.MmsValue_toDouble(iec61850.MmsValue_getElement(value, 0))
+            val_part2 = iec61850.MmsValue_getElement(value, 1)
+            bitstring_size = iec61850.MmsValue_getBitStringSize(val_part2)
+            print(item)
+            print("value: %s" % val_part1)
+            print("bitstring_size: %s" % bitstring_size)
+            for i in range(bitstring_size):
+                print("bitstring_value: %s" % iec61850.MmsValue_getBitStringBit(val_part2,i))
+    else:
+        print("Connection failed!\n")
 
 if __name__ == '__main__':
     main()
