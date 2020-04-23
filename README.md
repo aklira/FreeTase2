@@ -15,6 +15,7 @@ FreeTase2 is a free and open source Python library for the Intercontrol Center C
 ## Features
 ### Client support
 ### Server support
+## Examples
 ## Licensing
 ## Contributing
 
