@@ -41,17 +41,13 @@ def main():
 
     if (conn):
         print("Connection established!\n")
-        value = iec61850.MmsValue_newBitString(1)
+        value = iec61850.MmsValue_newInteger(1)
         print("Set cmd to: ", sys.argv[1])
         for item in itemId:
             if (sys.argv[1] == "ON"):
-                #value = iec61850.MmsValue_newBoolean(True)
-                #value = iec61850.MmsValue_newVisibleString("ON")
-                iec61850.MmsValue_setBitStringFromInteger(value, 1)
+                iec61850.MmsValue_setInt8(value, 1)
             elif (sys.argv[1] == "OFF"):
-                #value = iec61850.MmsValue_newBoolean(False)
-                #value = iec61850.MmsValue_newVisibleString("OFF")
-                iec61850.MmsValue_setBitStringFromInteger(value, 0)
+                iec61850.MmsValue_setInt8(value, 0)
             else:
                 print("Unknown command!\n")
             
