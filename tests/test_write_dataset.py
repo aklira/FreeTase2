@@ -10,9 +10,9 @@ Free and open implementation of the IEC 60870-6 TASE.2 protocol
 import iec61850
 
 domain = "TestDomain"
-ds_name = "ds_real"
+ds_name = "TSetAnalog"
 buffer_time = 0
-integrity_time = 0
+integrity_time = 60
 
 REPORT_BUFFERED = 0x01
 REPORT_INTERVAL_TIMEOUT = 0x02
@@ -152,13 +152,13 @@ def write_dataset(mmsConnection,
         iec61850.MmsValue_setBitStringBit(elem, 2, True)
     
     elem = iec61850.MmsValue_getElement(dataset, 7)
-    iec61850.MmsValue_setBoolean(elem, True)
+    iec61850.MmsValue_setBoolean(elem, False)
 
     elem = iec61850.MmsValue_getElement(dataset, 8)
-    iec61850.MmsValue_setBoolean(elem, True)
+    iec61850.MmsValue_setBoolean(elem, False)
 
     elem = iec61850.MmsValue_getElement(dataset, 9)
-    iec61850.MmsValue_setBoolean(elem, True)
+    iec61850.MmsValue_setBoolean(elem, False) # Report By Exception
 
     elem = iec61850.MmsValue_getElement(dataset, 10)
     if(all_changes_reported&REPORT_BUFFERED):
@@ -172,7 +172,13 @@ def write_dataset(mmsConnection,
     elem = iec61850.MmsValue_getElement(dataset, 12)
     iec61850.MmsValue_setInt32(elem, 0)
 
-    iec61850.MmsConnection_writeVariable(mmsConnection, mmsError, domain, ts_name, dataset)
+    #DEBUG
+    import pdb; pdb.set_trace()
+    
+    print("Before MmsConnection_writeVariable")
+
+    result = iec61850.MmsConnection_writeVariable(mmsConnection, mmsError, domain, ts_name, dataset)
+    print(result)
 
     success = True
 
@@ -202,13 +208,25 @@ def main():
     mmsError = iec61850.toMmsErrorP()
     result = iec61850.MmsConnection_connect(mms_connection, mmsError, remote_server, remote_port)
 
+    iec61850.MmsConnection_deleteNamedVariableList(mms_connection, 
+                                                   mmsError, 
+                                                   domain, 
+                                                   ds_name)
+    
+    handler = iec61850.informationReportHandler_create()
+
+    iec61850.MmsConnection_setInformationReportHandler(mms_connection, handler, mms_connection)
+
     vars = iec61850.LinkedList_create()
-    name = iec61850.MmsVariableAccessSpecification_create(domain, "Transfer_Set_Name")
-    tst = iec61850.MmsVariableAccessSpecification_create(domain, "Transfer_Set_Time_Stamp")
-    dsc = iec61850.MmsVariableAccessSpecification_create(domain, "DSConditions_Detected")
-    iec61850.LinkedList_add(vars, name)
-    iec61850.LinkedList_add(vars, tst)
-    iec61850.LinkedList_add(vars, dsc)
+    #name = iec61850.MmsVariableAccessSpecification_create(domain, "Transfer_Set_Name")
+    #tst = iec61850.MmsVariableAccessSpecification_create(domain, "Transfer_Set_Time_Stamp")
+    #dsc = iec61850.MmsVariableAccessSpecification_create(domain, "DSConditions_Detected")
+    #iec61850.LinkedList_add(vars, name)
+    #iec61850.LinkedList_add(vars, tst)
+    #iec61850.LinkedList_add(vars, dsc)
+
+    var = iec61850.MmsVariableAccessSpecification_create(domain, "tm1")
+    iec61850.LinkedList_add(vars, var)
 
     iec61850.MmsConnection_defineNamedVariableList(mms_connection, 
                                                    mmsError, 
@@ -222,15 +240,20 @@ def main():
                                                   "Next_DSTransfer_Set")
     ts_name = iec61850.MmsValue_toString(iec61850.MmsValue_getElement(next_ts, 2))
 
-    result = write_dataset(mms_connection, 
-                           mmsError, 
-                           domain, 
-                           ds_name, 
-                           ts_name,
-                           buffer_time,
-                           integrity_time, 
-                           REPORT_BUFFERED|REPORT_INTERVAL_TIMEOUT|REPORT_OBJECT_CHANGES)
-    print(result)
+    try:
+        result = write_dataset(mms_connection, 
+                               mmsError, 
+                               domain, 
+                               ds_name, 
+                               ts_name,
+                               buffer_time,
+                               integrity_time, 
+                               REPORT_BUFFERED|REPORT_INTERVAL_TIMEOUT|REPORT_OBJECT_CHANGES)
+        print(result)
+    except:
+        print("Error writing dataset")
+        pass
+    
 
 if __name__ == '__main__':
     main()

@@ -134,15 +134,15 @@ class DataSet():
         self.datavalues = datavalues
         self.access_controls = access_controls
 
-    def create_dataset(self, ds_name):
+    def create_dataset(self, domain):
         pass
 
-    def delete_dataset(self, ds_name, dataset_id):
+    def delete_dataset(self, domain, dataset_id):
         success = False
         try:
             iec61850.MmsConnection_deleteNamedVariableList(self.MmsConnection, 
                                                            self.mmsError, 
-                                                           ds_name, 
+                                                           domain, 
                                                            dataset_id)
             success = True
         except:

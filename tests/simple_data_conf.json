@@ -1,0 +1,11 @@
+{ 
+    "datasets": [
+        {
+            "ds_name": "TSetAnalog",
+            "ds_type": "analog",
+            "ds_values": [
+                {"id":"tm1","type":"IRQ"}
+            ]
+        }
+    ]
+}

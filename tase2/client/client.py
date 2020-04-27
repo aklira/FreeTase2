@@ -329,6 +329,7 @@ def start_iccp(dataconf_file):
     for ds_ts_item in ds_ts_lst:
         try:
             if (ds_ts_item.dataset_type == "analog"):
+                print("analog dataset detected")
                 add_ds_ts_ok = write_dataset(conn.MmsConnection,
                             mmsError,  
                             vcc.domain, 
@@ -338,6 +339,7 @@ def start_iccp(dataconf_file):
                             integrity_time, 
                             REPORT_INTERVAL_TIMEOUT|REPORT_OBJECT_CHANGES|REPORT_BUFFERED)
             elif (ds_ts_item.dataset_type == "digital"):
+                 print("digital dataset detected")
                  add_ds_ts_ok = write_dataset(conn.MmsConnection,
                             mmsError,  
                             vcc.domain, 
@@ -347,6 +349,7 @@ def start_iccp(dataconf_file):
                             integrity_time, 
                             REPORT_INTERVAL_TIMEOUT|REPORT_OBJECT_CHANGES)
             elif (ds_ts_item.dataset_type == "events"):
+                 print("events dataset detected")
                  add_ds_ts_ok = write_dataset(conn.MmsConnection,
                             mmsError,  
                             vcc.domain, 
@@ -358,7 +361,7 @@ def start_iccp(dataconf_file):
             else:
                 add_ds_ts_ok = False
         except:
-            print("Error in adding datasets to transfersets ")
+            print("Error in adding datasets to transfersets")
             pass
     success = chk_blt_tbl_ok and del_datasets_ok and read_dataconf_ok and create_ds_ok and create_ts_ok and add_ds_ts_ok
     return success
@@ -577,7 +580,8 @@ def write_dataset(mmsConnection,
     elem = iec61850.MmsValue_getElement(dataset, 12)
     iec61850.MmsValue_setInt32(elem, 0)
 
-    iec61850.MmsConnection_writeVariable(mmsConnection, mmsError, domain, ts_name, dataset)
+    result = iec61850.MmsConnection_writeVariable(mmsConnection, mmsError, domain, ts_name, dataset)
+    print(result)
 
     success = True
 
