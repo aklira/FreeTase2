@@ -154,11 +154,11 @@ vcc = None
 iccpconf = None
 dataconf = None
 
-REPORT_BUFFERED=0x01
-REPORT_INTERVAL_TIMEOUT=0x02
-REPORT_OBJECT_CHANGES=0x04
+REPORT_BUFFERED = 0x01
+REPORT_INTERVAL_TIMEOUT = 0x02
+REPORT_OBJECT_CHANGES = 0x04
 
-integrity_time=0 
+integrity_time=60 
 analog_buf=0 
 digital_buf=0 
 events_buf=0
@@ -278,12 +278,12 @@ def start_iccp(dataconf_file):
     try:        
         for ds_item in dataconf:
             vars = iec61850.LinkedList_create()
-            name = iec61850.MmsVariableAccessSpecification_create(vcc.domain, "Transfer_Set_Name")
-            tst = iec61850.MmsVariableAccessSpecification_create(vcc.domain, "Transfer_Set_Time_Stamp")
-            dsc = iec61850.MmsVariableAccessSpecification_create(vcc.domain, "DSConditions_Detected")
-            iec61850.LinkedList_add(vars, name)
-            iec61850.LinkedList_add(vars, tst)
-            iec61850.LinkedList_add(vars, dsc)
+            #name = iec61850.MmsVariableAccessSpecification_create(vcc.domain, "Transfer_Set_Name")
+            #tst = iec61850.MmsVariableAccessSpecification_create(vcc.domain, "Transfer_Set_Time_Stamp")
+            #dsc = iec61850.MmsVariableAccessSpecification_create(vcc.domain, "DSConditions_Detected")
+            #iec61850.LinkedList_add(vars, name)
+            #iec61850.LinkedList_add(vars, tst)
+            #iec61850.LinkedList_add(vars, dsc)
 
             var_s_lst = []
             for dv_item in ds_item.datavalues:
@@ -325,39 +325,40 @@ def start_iccp(dataconf_file):
         print("Error in creating transfersets")
         pass
 
+# add report information handler
+    handler = iec61850.informationReportHandler_create()
+    iec61850.MmsConnection_setInformationReportHandler(conn.MmsConnection, handler, conn.MmsConnection)
+
 # add datasets to transfersets
     for ds_ts_item in ds_ts_lst:
         try:
             if (ds_ts_item.dataset_type == "analog"):
                 print("analog dataset detected")
-                add_ds_ts_ok = write_dataset(conn.MmsConnection,
-                            mmsError,  
-                            vcc.domain, 
-                            ds_ts_item.dataset_name, 
-                            ds_ts_item.name, 
-                            analog_buf, 
-                            integrity_time, 
-                            REPORT_INTERVAL_TIMEOUT|REPORT_OBJECT_CHANGES|REPORT_BUFFERED)
+                add_ds_ts_ok = write_dataset(conn.MmsConnection,  
+                                             vcc.domain, 
+                                             ds_ts_item.dataset_name.encode("utf-8"), 
+                                             ds_ts_item.name, 
+                                             analog_buf, 
+                                             integrity_time, 
+                                             REPORT_INTERVAL_TIMEOUT|REPORT_OBJECT_CHANGES|REPORT_BUFFERED)
             elif (ds_ts_item.dataset_type == "digital"):
                  print("digital dataset detected")
-                 add_ds_ts_ok = write_dataset(conn.MmsConnection,
-                            mmsError,  
-                            vcc.domain, 
-                            ds_ts_item.dataset_name, 
-                            ds_ts_item.name, 
-                            digital_buf, 
-                            integrity_time, 
-                            REPORT_INTERVAL_TIMEOUT|REPORT_OBJECT_CHANGES)
+                 add_ds_ts_ok = write_dataset(conn.MmsConnection,  
+                                              vcc.domain, 
+                                              ds_ts_item.dataset_name.encode("utf-8"), 
+                                              ds_ts_item.name, 
+                                              digital_buf, 
+                                              integrity_time, 
+                                              REPORT_INTERVAL_TIMEOUT|REPORT_OBJECT_CHANGES)
             elif (ds_ts_item.dataset_type == "events"):
                  print("events dataset detected")
                  add_ds_ts_ok = write_dataset(conn.MmsConnection,
-                            mmsError,  
-                            vcc.domain, 
-                            ds_ts_item.dataset_name, 
-                            ds_ts_item.name, 
-                            events_buf, 
-                            integrity_time, 
-                            REPORT_OBJECT_CHANGES)
+                                              vcc.domain, 
+                                              ds_ts_item.dataset_name.encode("utf-8"), 
+                                              ds_ts_item.name, 
+                                              events_buf, 
+                                              integrity_time, 
+                                              REPORT_OBJECT_CHANGES)
             else:
                 add_ds_ts_ok = False
         except:
@@ -429,8 +430,7 @@ def readDataConf(json_file, mmsConnection, mmsError):
     
     return ds_lst
 
-def write_dataset(mmsConnection,
-                  mmsError,  
+def write_dataset(mmsConnection,  
                   domain, 
                   ds_name, 
                   ts_name, 
@@ -438,151 +438,13 @@ def write_dataset(mmsConnection,
                   integrity_time, 
                   all_changes_reported):
     
-    success = False
+    try:
+        iec61850.write_dataset(mmsConnection,domain,ds_name,ts_name,buffer_time,integrity_time,
+                               all_changes_reported)
 
-    typeSpec = iec61850.MmsVariableSpecification_create(1)
-    iec61850.setMmsVSType(typeSpec, 1) # MMS_STRUCTURE
-    iec61850.setMmsVSTypeSpecElementCount(typeSpec, 13)
-    iec61850.MmsVSTypeSpecElements_create(typeSpec, 13)
-
-    element = iec61850.MmsVariableSpecification_create(1)
-    iec61850.setMmsVSType(element, 1) # MMS_STRUCTURE
-    iec61850.setMmsVSTypeSpecElementCount(element, 3)
-    iec61850.MmsVSTypeSpecElements_create(element, 3)
-
-    inside_element = iec61850.MmsVariableSpecification_create(1)
-    iec61850.setMmsVSType(inside_element, 5) # MMS_UNSIGNED
-    iec61850.setMmsVSTypeSpecUInt(inside_element, 8)
-    iec61850.setMmsVSTypeSpecElementCount(inside_element, 3)
-    iec61850.setMmsVSTypeSpecElement(element, inside_element, 0)
-
-    inside_element = iec61850.MmsVariableSpecification_create(1)
-    iec61850.setMmsVSType(inside_element, 8) # MMS_VISIBLE_STRING
-    iec61850.setMmsVSTypeSpecVString(inside_element, -129)
-    iec61850.setMmsVSTypeSpecElement(element, inside_element, 1)
-
-    inside_element = iec61850.MmsVariableSpecification_create(1)
-    iec61850.setMmsVSType(inside_element, 8) # MMS_VISIBLE_STRING
-    iec61850.setMmsVSTypeSpecVString(inside_element, -129)
-    iec61850.setMmsVSTypeSpecElement(element, inside_element, 2)
-
-    iec61850.setMmsVSTypeSpecElement(typeSpec, element, 0)
-
-    element = iec61850.MmsVariableSpecification_create(1)
-    iec61850.setMmsVSType(element, 4) # MMS_INTEGER
-    iec61850.setMmsVSTypeInteger(element, 8)
-    iec61850.setMmsVSTypeSpecElement(typeSpec, element, 1)
-
-    element = iec61850.MmsVariableSpecification_create(1)
-    iec61850.setMmsVSType(element, 4) # MMS_INTEGER
-    iec61850.setMmsVSTypeInteger(element, 8)
-    iec61850.setMmsVSTypeSpecElement(typeSpec, element, 2)
-
-    element = iec61850.MmsVariableSpecification_create(1)
-    iec61850.setMmsVSType(element, 4) # MMS_INTEGER
-    iec61850.setMmsVSTypeInteger(element, 8)
-    iec61850.setMmsVSTypeSpecElement(typeSpec, element, 3)
-
-    element = iec61850.MmsVariableSpecification_create(1)
-    iec61850.setMmsVSType(element, 4) # MMS_INTEGER
-    iec61850.setMmsVSTypeInteger(element, 8)
-    iec61850.setMmsVSTypeSpecElement(typeSpec, element, 4)
-
-    element = iec61850.MmsVariableSpecification_create(1)
-    iec61850.setMmsVSType(element, 4) # MMS_INTEGER
-    iec61850.setMmsVSTypeInteger(element, 8)
-    iec61850.setMmsVSTypeSpecElement(typeSpec, element, 5)
-
-    element = iec61850.MmsVariableSpecification_create(1)
-    iec61850.setMmsVSType(element, 3) # MMS_BIT_STRING
-    iec61850.setMmsVSTypebitString(element, 5)
-    iec61850.setMmsVSTypeSpecElement(typeSpec, element, 6)
-
-    element = iec61850.MmsVariableSpecification_create(1)
-    iec61850.setMmsVSType(element, 2) # MMS_BOOLEAN
-    iec61850.setMmsVSTypeSpecElement(typeSpec, element, 7)
-
-    element = iec61850.MmsVariableSpecification_create(1)
-    iec61850.setMmsVSType(element, 2) # MMS_BOOLEAN
-    iec61850.setMmsVSTypeSpecElement(typeSpec, element, 8)
-
-    element = iec61850.MmsVariableSpecification_create(1)
-    iec61850.setMmsVSType(element, 2) # MMS_BOOLEAN
-    iec61850.setMmsVSTypeSpecElement(typeSpec, element, 9)
-
-    element = iec61850.MmsVariableSpecification_create(1)
-    iec61850.setMmsVSType(element, 2) # MMS_BOOLEAN
-    iec61850.setMmsVSTypeSpecElement(typeSpec, element, 10)
-
-    element = iec61850.MmsVariableSpecification_create(1)
-    iec61850.setMmsVSType(element, 2) # MMS_BOOLEAN
-    iec61850.setMmsVSTypeSpecElement(typeSpec, element, 11)
-
-    element = iec61850.MmsVariableSpecification_create(1)
-    iec61850.setMmsVSType(element, 4) # MMS_INTEGER
-    iec61850.setMmsVSTypeInteger(element, 8)
-    iec61850.setMmsVSTypeSpecElement(typeSpec, element, 12)
-
-    dataset = iec61850.MmsValue_newStructure(typeSpec)
-
-    elem = iec61850.MmsValue_getElement(dataset, 0)
-
-    ielem = iec61850.MmsValue_getElement(elem, 0)
-    iec61850.MmsValue_setUint8(ielem, 1)
-
-    ielem = iec61850.MmsValue_getElement(elem, 1)
-    iec61850.MmsValue_setVisibleString(ielem, domain)
-
-    ielem = iec61850.MmsValue_getElement(elem, 2)
-    iec61850.MmsValue_setVisibleString(ielem, ds_name)
-
-    elem = iec61850.MmsValue_getElement(dataset, 1)
-    iec61850.MmsValue_setInt32(elem, 0)
-
-    elem = iec61850.MmsValue_getElement(dataset, 2)
-    iec61850.MmsValue_setInt32(elem, 0)
-
-    elem = iec61850.MmsValue_getElement(dataset, 3)
-    iec61850.MmsValue_setInt32(elem, 0)
-
-    elem = iec61850.MmsValue_getElement(dataset, 4)
-    iec61850.MmsValue_setInt32(elem, buffer_time) # Buffer interval
-
-    elem = iec61850.MmsValue_getElement(dataset, 5)
-    iec61850.MmsValue_setInt32(elem, integrity_time) # Integrity check time
-
-    elem = iec61850.MmsValue_getElement(dataset, 6)
-
-    if(all_changes_reported&REPORT_INTERVAL_TIMEOUT):
-        iec61850.MmsValue_setBitStringBit(elem, 1, True)
-	
-    if(all_changes_reported&REPORT_OBJECT_CHANGES): 
-        iec61850.MmsValue_setBitStringBit(elem, 2, True)
-    
-    elem = iec61850.MmsValue_getElement(dataset, 7)
-    iec61850.MmsValue_setBoolean(elem, True)
-
-    elem = iec61850.MmsValue_getElement(dataset, 8)
-    iec61850.MmsValue_setBoolean(elem, True)
-
-    elem = iec61850.MmsValue_getElement(dataset, 9)
-    iec61850.MmsValue_setBoolean(elem, True)
-
-    elem = iec61850.MmsValue_getElement(dataset, 10)
-    if(all_changes_reported&REPORT_BUFFERED):
-        iec61850.MmsValue_setBoolean(elem, False)
-    else:
-        iec61850.MmsValue_setBoolean(elem, True)
-
-    elem = iec61850.MmsValue_getElement(dataset, 11)
-    iec61850.MmsValue_setBoolean(elem, True)
-
-    elem = iec61850.MmsValue_getElement(dataset, 12)
-    iec61850.MmsValue_setInt32(elem, 0)
-
-    result = iec61850.MmsConnection_writeVariable(mmsConnection, mmsError, domain, ts_name, dataset)
-    print(result)
-
-    success = True
+        success = True
+    except:
+        print("Error writing dataset")
+        success = False
 
     return success

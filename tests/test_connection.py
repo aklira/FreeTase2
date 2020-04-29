@@ -8,11 +8,22 @@ sys.path.insert(0, "..")
 
 import tase2.client.client as tase2client
 from time import sleep
+import signal
 
 conf_file = 'test_conn_conf.yml'
 data_conf = 'simple_data_conf.json'
 
+running = True
+
+def sigint_handler(signalNumber, frame):
+    global running
+    running = False
+
 def main():
+
+    # user interruption handling
+    signal.signal(signal.SIGINT, sigint_handler)
+
     # init iccp
     result = tase2client.init_iccp(conf_file)
     if (not result):
@@ -31,11 +42,13 @@ def main():
     else:
         print("ICCP client start-up ok")    
     # keep connection alive until user interrupts
-    while 1:
-       if (result == False):
+    while(running):
+       if (not result):
            break
-       print(result)
+       print("Client process running")
        sleep(10)
+    
+    quit()
 
 if __name__ == '__main__':
     main()
